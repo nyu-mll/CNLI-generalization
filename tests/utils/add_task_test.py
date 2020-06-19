@@ -25,31 +25,42 @@ class DataRow(BaseDataRow):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Add a task test")
     parser.add_argument("task", help="name of task")
-    parser.add_argument("path", help="filepath for raw task data to be added")
-    parser.add_argument("number", type=int, help="number of examples to use in task test")
+    parser.add_argument("raw_data_dir_path", help="directory of raw task data to be added")
+    parser.add_argument("train_filename", help="filename of train data")
+    parser.add_argument("val_filename", help="filename of validation data")
+    parser.add_argument("test_filename", help="filename of test data")
+    parser.add_argument(
+        "--number", type=int, default=5, help="number of examples to use in task test"
+    )
     parser.add_argument("--input_a", type=str, help="name of input_a")
     parser.add_argument("--input_b", type=str, default=None, help="name of input_a")
     parser.add_argument("--overwrite", help="overwrite existing files", action="store_true")
-    parser.add_argument("--task_raw_test_data_out_path", default="data")
+    parser.add_argument(
+        "--task_raw_test_data_out_path",
+        default=os.path.join("..", "lib", "resources", "data"),
+        help="raw test task data directory",
+    )
     args = parser.parse_args()
 
     # create task test config
-    task_config_path = os.path.join(os.path.dirname(__file__), "..", "tasks", "lib", "resources", args.task + ".json")
+    task_config_path = os.path.join(
+        os.path.dirname(__file__), "..", "tasks", "lib", "resources", args.task + ".json"
+    )
     if os.path.exists(task_config_path) or args.overwrite:
         with open(task_config_path, "w") as f:
             test_config = {}
-            test_config['task'] = args.task
-            test_config['name'] = args.task
+            test_config["task"] = args.task
+            test_config["name"] = args.task
             set_path_list = {}
             for set_name in SET_NAMES:
-                set_path_list[set_name] = os.path.join(args.task_raw_test_data_out_path, args.task, set_name + ".jsonl")
-            test_config['paths'] = set_path_list
+                set_path_list[set_name] = os.path.join(
+                    args.task_raw_test_data_out_path, args.task, set_name + ".jsonl"
+                )
+            test_config["paths"] = set_path_list
             f.write(json.dumps(test_config))
 
     # create task test data (raw) directory if it does not exist
-    task_data_dir = os.path.join(
-        os.path.dirname(__file__), "..", "tasks", "lib", "resources", "data", args.task
-    )
+    task_data_dir = os.path.join(args.task_raw_test_data_out_path, args.task)
     if not os.path.exists(task_data_dir):
         os.makedirs(task_data_dir)
 
@@ -64,6 +75,8 @@ if __name__ == "__main__":
         "task_examples",
         args.task,
     )
+    if not os.path.exists(task_fixture_dir):
+        os.makedirs(task_fixture_dir)
 
     # create fixture examples file with necessary headers
     task_fixture_path = os.path.join(task_fixture_dir, args.task + "_examples.py")
@@ -76,8 +89,17 @@ if __name__ == "__main__":
 
     # iterate through set types and write raw data/fixture examples for each set
     for set_name in SET_NAMES:
+        if set_name == "train":
+            set_filename = args.train_filename
+        elif set_name == "val":
+            set_filename = args.val_filename
+        elif set_name == "test":
+            set_filename = args.test_filename
+        else:
+            raise RuntimeError(str(set_name) + " not found in SET_NAMES: " + str(SET_NAMES))
+            
         # read head of file
-        with open(os.path.join(args.path, set_name + ".jsonl")) as task_file:
+        with open(os.path.join(args.raw_data_dir_path, set_filename)) as task_file:
             head = [next(task_file) for x in range(args.number)]
 
         # write head to test task data directory
@@ -89,7 +111,7 @@ if __name__ == "__main__":
         # read data in JSON format
         task_test_data = [json.loads(example) for example in head]
         for idx, example in enumerate(task_test_data):
-            example['guid'] = set_name + "-" + str(idx)
+            example["guid"] = set_name + "-" + str(idx)
 
         # write fixture examples to file
         with open(os.path.join(task_fixture_dir, args.task + "_examples.py"), "a") as fixture_file:
