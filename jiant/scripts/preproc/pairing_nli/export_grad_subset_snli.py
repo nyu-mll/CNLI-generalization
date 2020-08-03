@@ -28,7 +28,7 @@ DATA_CONVERSION = {
             },
             "train_hypothesis": {
                 "cols": {"sentence1": 7, "sentence2": 8, "gold_label": 10},
-                "meta": {"skiprows": 1},
+                "meta": {"filename": "train", "skiprows": 1},
             },
             "val_hypothesis": {
                 "cols": {"sentence1": 7, "sentence2": 8, "gold_label": 14},
