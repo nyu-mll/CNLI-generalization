@@ -40,6 +40,23 @@ GLUE_CONVERSION = {
         },
         "dir_name": "MNLI",
     },
+    "snli": {
+        "data": {
+            "train": {
+                "cols": {"sentence1": 7, "sentence2": 8, "gold_label": 10},
+                "meta": {"skiprows": 1},
+            },
+            "val": {
+                "cols": {"sentence1": 7, "sentence2": 8, "gold_label": 14},
+                "meta": {"filename": "dev", "skiprows": 1},
+            },
+            "test": {
+                "cols": {"sentence1": 7, "sentence2": 8},
+                "meta": {"filename": "test", "skiprows": 1},
+            },
+        },
+        "dir_name": "SNLI",
+    },
     "mrpc": {
         "data": {
             "train": {"cols": {"text_a": 3, "text_b": 4, "label": 0}, "meta": {"skiprows": 1}},
@@ -150,29 +167,22 @@ def get_full_examples(task_name, input_base_path):
     return all_examples
 
 
-def convert_glue_data(input_base_path, task_data_path, task_name):
-    os.makedirs(task_data_path, exist_ok=True)
-    task_all_examples = get_full_examples(task_name=task_name, input_base_path=input_base_path)
-    paths_dict = {}
-    for phase, phase_data in task_all_examples.items():
-        phase_data_path = os.path.join(task_data_path, f"{phase}.jsonl")
-        py_io.write_jsonl(
-            data=phase_data, path=phase_data_path,
-        )
-        paths_dict[phase] = phase_data
-    return paths_dict
-
-
 def preprocess_all_glue_data(input_base_path, output_base_path):
     os.makedirs(output_base_path, exist_ok=True)
     os.makedirs(os.path.join(output_base_path, "data"), exist_ok=True)
     os.makedirs(os.path.join(output_base_path, "configs"), exist_ok=True)
     for task_name in tqdm.tqdm(GLUE_CONVERSION):
         task_data_path = os.path.join(output_base_path, "data", task_name)
-        paths_dict = convert_glue_data(
-            input_base_path=input_base_path, task_data_path=task_data_path, task_name=task_name,
-        )
-        config = {"task": task_name, "paths": paths_dict, "name": task_name}
+        os.makedirs(task_data_path, exist_ok=True)
+        task_all_examples = get_full_examples(task_name=task_name, input_base_path=input_base_path)
+        config = {"task": task_name, "paths": {}, "name": task_name}
+        for phase, phase_data in task_all_examples.items():
+            phase_data_path = os.path.join(task_data_path, f"{phase}.jsonl")
+            py_io.write_jsonl(
+                data=phase_data, path=phase_data_path,
+            )
+            config["paths"][phase] = phase_data_path
+
         py_io.write_json(
             data=config, path=os.path.join(output_base_path, "configs", f"{task_name}.json")
         )

@@ -165,14 +165,25 @@ class JiantRunner:
         # Not currently supported distributed parallel
         train_dataloader_dict = {}
         for task_name in self.jiant_task_container.task_run_config.train_task_list:
-            task = self.jiant_task_container.task_dict[task_name]
-            train_cache = self.jiant_task_container.task_cache_dict[task_name]["train"]
-            train_batch_size = self.jiant_task_container.task_specific_configs[
-                task_name
-            ].train_batch_size
+            # task = self.jiant_task_container.task_dict[task_name]
+            # train_cache = self.jiant_task_container.task_cache_dict[task_name]["train"]
+            # train_batch_size = self.jiant_task_container.task_specific_configs[
+            #     task_name
+            # ].train_batch_size
+            dataloader_args = {}
+            dataloader_args['task'] = self.jiant_task_container.task_dict[task_name]
+            dataloader_args['train_cache'] = self.jiant_task_container.task_cache_dict[task_name]["train"]
+
+            task_configs = self.jiant_task_container.task_specific_configs[task_name]
+            dataloader_args['train_batch_size'] = task_configs.train_batch_size
+            dataloader_args['batch_method'] = task_configs.batch_method
+            dataloader_args['min_batch_size'] = task_configs.min_batch_size
+            dataloader_args['total_batches'] = task_configs.total_batches
+            dataloader_args['matchlist_pickle_path'] = task_configs.matchlist_pickle_path
+
             train_dataloader_dict[task_name] = InfiniteYield(
                 get_train_dataloader_from_cache(
-                    train_cache=train_cache, task=task, train_batch_size=train_batch_size,
+                    **dataloader_args
                 )
             )
         return train_dataloader_dict

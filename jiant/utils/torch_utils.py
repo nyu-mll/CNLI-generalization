@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F  # noqa PyPep8Naming
 
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, Sampler
 
 CPU_DEVICE = torch.device("cpu")
 
@@ -65,11 +65,7 @@ class IdentityModule(nn.Module):
 
 def set_requires_grad(named_parameters, requires_grad):
     for name, param in named_parameters:
-        set_requires_grad_single(param, requires_grad)
-
-
-def set_requires_grad_single(param, requires_grad):
-    param.requires_grad = requires_grad
+        param.requires_grad = requires_grad
 
 
 def get_only_requires_grad(parameters, requires_grad=True):
@@ -114,6 +110,53 @@ class DataLoaderWithLength(DataLoader):
     def get_num_batches(self):
         return math.ceil(len(self.dataset) / self.batch_size)
 
+class MatchedRandomBatchSampler(Sampler):
+    """Random batch sampler that wraps individual sampler. Samples with clustered data with replacement to generate
+       batches of clusters.
+
+        Returns potentially different sized batches at least min_batch_size and at most max_batch_size.
+        Clusters are precomputed and passed through a list of lists.
+
+        Attributes:
+            min_batch_size : Min batch size of individual example indices
+            min_batch_size : Max batch size of individual example indices
+            drop_last      : Boolean, whether to drop last batch unfinished batch
+            match_list     : List of clusters. Clusters represented as list of individual example indices.
+            n_clusters     : Total number of clusters.
+            total_batches  : Total batches required for run.
+    """
+    def __init__(self,
+                 min_batch_size,
+                 max_batch_size,
+                 drop_last,
+                 match_list,
+                 total_batches):
+        self.min_batch_size = min_batch_size
+        self.max_batch_size = max_batch_size
+        self.drop_last = drop_last
+        self.match_list = match_list
+        self.n_clusters = len(match_list)
+        self.total_batches = total_batches
+
+    def __iter__(self):
+        batch = []
+        yielded = 0
+        while yielded < self.total_batches:
+            sampled_cluster = torch.randint(len(self.match_list), (1,)).item()
+            if len(batch) + len(self.match_list[sampled_cluster]) > self.max_batch_size:
+                if len(batch) < self.min_batch_size:
+                    continue
+                else:
+                    yielded += 1
+                    yield batch
+                    batch = self.match_list[sampled_cluster]
+            else:
+                batch += self.match_list[sampled_cluster]
+        if len(batch) > 0 and not self.drop_last:
+            yield batch
+
+    def __len__(self):
+        return self.total_batches
 
 def is_data_parallel(torch_module):
     return isinstance(torch_module, nn.DataParallel)

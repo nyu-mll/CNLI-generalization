@@ -16,6 +16,11 @@ class TaskSpecificConfig(ExtendedDataClassMixin):
     gradient_accumulation_steps: int
     eval_subset_num: int
 
+    # included for clustered batching
+    batch_method: str = 'default'
+    min_batch_size: int = 0
+    total_batches: int = 0
+    matchlist_pickle_path: str = ""
 
 @dataclass
 class GlobalTrainConfig(ExtendedDataClassMixin):

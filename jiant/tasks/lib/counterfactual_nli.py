@@ -27,7 +27,7 @@ class Example(BaseExample):
             guid=self.guid,
             input_premise=tokenizer.tokenize(self.input_premise),
             input_hypothesis=tokenizer.tokenize(self.input_hypothesis),
-            label_id=SnliTask.LABEL_TO_ID[self.label],
+            label_id=CounterfactualNliTask.LABEL_TO_ID[self.label],
         )
 
 
@@ -69,7 +69,7 @@ class Batch(BatchMixin):
     tokens: list
 
 
-class SnliTask(Task):
+class CounterfactualNliTask(Task):
     Example = Example
     TokenizedExample = Example
     DataRow = DataRow
@@ -95,23 +95,21 @@ class SnliTask(Task):
         dash_labels = 0
         for (i, line) in enumerate(lines):
             if set_type != "test":
-                if line["gold_label"] == "-":
+                if line["label"] == "-":
                     dash_labels+=1
                     continue
-                elif line["gold_label"] == "":
+                elif line["label"] == "":
                     empty_labels+=1
                     continue
                 else:
-                    assert line["gold_label"] in cls.LABELS, f"Example {i} not supported: {line['gold_label']}"
+                    assert line["label"] in cls.LABELS, f"Example {i} label not supported: {line['label']}"
+
             examples.append(
                 Example(
                     guid="%s-%s" % (set_type, i),
-                    input_premise=line["sentence1"],
-                    input_hypothesis=line["sentence2"],
-                    label=line["gold_label"] if set_type != "test" else cls.LABELS[-1],
+                    input_premise=line["premise"],
+                    input_hypothesis=line["hypothesis"],
+                    label=line["label"] if set_type != "test" else cls.LABELS[-1],
                 )
             )
-
-        print(f"Number of '-' labels is: {dash_labels}")
-        print(f"Number of '' labels is: {empty_labels}")
         return examples

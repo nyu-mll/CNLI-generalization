@@ -31,6 +31,8 @@ class Chunker:
             return (i / self.chunk_size).astype(int), (i % self.chunk_size).astype(int)
         elif isinstance(i, torch.Tensor):
             return self.lookup_chunk_and_index(i.numpy())
+        elif isinstance(i, list):
+            return self.lookup_chunk_and_index(np.array(i))
         else:
             raise TypeError(type(i))
 
@@ -179,6 +181,23 @@ class ChunkedFilesDataCache(DataCache):
             verbose=verbose,
         )
 
+    def get_uniterable_dataset(
+        self,
+        buffer_size=None,
+        shuffle=False,
+        subset_num: Union[None, int] = None,
+        explicit_subset: Union[None, Sequence] = None,
+        verbose=False,
+    ):
+        return ChunkedFilesUniterableDataset(
+            buffer_size=buffer_size,
+            shuffle=shuffle,
+            subset_num=subset_num,
+            explicit_subset=explicit_subset,
+            chunked_file_data_cache=self,
+            verbose=verbose,
+        )
+
     def load_chunk(self, i):
         return torch.load(self.get_chunk_path(i))
 
@@ -272,6 +291,42 @@ class ChunkedFilesIterableDataset(torch.utils.data.dataset.IterableDataset):
             indices = indices[: self.subset_num]
         buffer_chunked_indices = convert_to_chunks(indices, chunk_size=self.buffer_size)
         return buffer_chunked_indices
+
+    def __len__(self):
+        return self.length
+
+class ChunkedFilesUniterableDataset(torch.utils.data.dataset.Dataset):
+    def __init__(
+        self,
+        buffer_size,
+        shuffle,
+        chunked_file_data_cache: ChunkedFilesDataCache,
+        subset_num: Union[int, None] = None,
+        explicit_subset: Union[Sequence, None] = None,
+        verbose=False,
+    ):
+        self.buffer_size = buffer_size
+        self.shuffle = shuffle
+        self.subset_num = subset_num
+        self.chunked_file_data_cache = chunked_file_data_cache
+        self.explicit_subset = explicit_subset
+        self.verbose = verbose
+
+        if self.explicit_subset is not None:
+            assert self.subset_num is None
+            self.length = len(self.explicit_subset)
+        else:
+            self.length = self.chunked_file_data_cache.length
+            if self.subset_num:
+                self.length = min(self.subset_num, self.length)
+
+        if self.buffer_size is None:
+            self.buffer_size = self.length
+
+        self.loaded_data = self.chunked_file_data_cache.get_all()
+
+    def __getitem__(self, index):
+        return self.loaded_data[index]
 
     def __len__(self):
         return self.length

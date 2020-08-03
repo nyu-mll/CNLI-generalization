@@ -30,6 +30,7 @@ from jiant.tasks.lib.swag import SWAGTask
 from jiant.tasks.lib.wic import WiCTask
 from jiant.tasks.lib.wnli import WnliTask
 from jiant.tasks.lib.wsc import WSCTask
+from jiant.tasks.lib.counterfactual_nli import CounterfactualNliTask
 from jiant.tasks.core import Task
 from jiant.utils.python.io import read_json
 
@@ -65,6 +66,7 @@ TASK_DICT = {
     "wic": WiCTask,
     "wnli": WnliTask,
     "wsc": WSCTask,
+    "counterfactual_nli": CounterfactualNliTask,
 }
 
 
