@@ -121,6 +121,14 @@ DATA_CONVERSION = {
                 "cols": {"premise": 8, "hypothesis": 9, "label": 15},
                 "meta": {"filename": "dev_matched", "skiprows": 1},
             },
+            "train_hypothesis": {
+                "cols": {"premise": 0, "hypothesis": 1, "label": 2},
+                "meta": {"filename": os.path.join("all_combined", "train"), "skiprows": 1},
+            },
+            "val_snli_hypothesis": {
+                "cols": {"premise": 7, "hypothesis": 8, "label": 14},
+                "meta": {"filename": "dev_snli", "skiprows": 1},
+            },
         },
         "dir_name": "CounterfactualNLI",
         "file_format": "tsv",
@@ -206,7 +214,7 @@ def get_full_examples(task_name, input_base_path):
             try:
                 example = {}
                 for col, i in phase_config["cols"].items():
-                    if task_name == 'snli' and 'hypothesis' in phase and col == 'sentence1':
+                    if 'hypothesis' in phase and ((task_name == 'snli' and col == 'sentence1') or (task_name == 'counterfactual_nli' and col == 'premise')):
                         example[col] = ""
                     else:
                         example[col] = row[i]
