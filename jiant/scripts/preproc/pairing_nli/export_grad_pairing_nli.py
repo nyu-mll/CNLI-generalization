@@ -77,6 +77,18 @@ DATA_CONVERSION = {
                 "cols": {"premise": 0, "hypothesis": 1},
                 "meta": {"filename": os.path.join("all_combined", "test"), "skiprows": 1},
             },
+            "train_revised_orig": {
+                "cols": {"premise": 0, "hypothesis": 1, "label": 2},
+                "meta": {"filename": os.path.join("original", "train"), "skiprows": 1},
+            },
+            "val_revised_orig": {
+                "cols": {"premise": 0, "hypothesis": 1, "label": 2},
+                "meta": {"filename": os.path.join("original", "dev"), "skiprows": 1},
+            },
+            "test_revised_orig": {
+                "cols": {"premise": 0, "hypothesis": 1},
+                "meta": {"filename": os.path.join("original", "test"), "skiprows": 1},
+            },
             "train_revised_combined": {
                 "cols": {"premise": 0, "hypothesis": 1, "label": 2},
                 "meta": {"filename": os.path.join("revised_combined", "train"), "skiprows": 1},
