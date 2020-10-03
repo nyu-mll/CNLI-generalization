@@ -130,5 +130,8 @@ dmypy.json
 # For Counterfactual Project
 models/*
 cache/*
+run_configs/*
+output_dir/*
+exp_scripts/*
 data/preprocessed/configs/*
 .idea/*
