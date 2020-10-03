@@ -34,6 +34,7 @@ def generate_data_config(
 
     config["paths"]["val"] = os.path.join(data_base_path, "val", val, f"{val_file}.jsonl")
 
+    os.makedirs(os.path.join(output_base_path, "configs"), exist_ok=True)
     py_io.write_json(
         data=config, path=os.path.join(output_base_path, "configs", f"{train}-{val}.json")
     )
