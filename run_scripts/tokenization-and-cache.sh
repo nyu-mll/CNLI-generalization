@@ -20,7 +20,6 @@ python jiant/proj/main/tokenize_and_cache.py \
     --phases train,val,test \
     --max_seq_length 256 \
     --do_iter \
-    --force_overwrite \
     --smart_truncate \
     --output_dir ${WORKING_DIR}/cache/${TRAIN}-${VAL}
 
