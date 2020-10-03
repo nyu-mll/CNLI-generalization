@@ -14,7 +14,7 @@ MODELS_DIR=${BASE_DIR}/models
 
 # Used in arguments
 JIANT_DIR=${BASE_DIR}/jiant
-COMMAND_DIR=${BASE_DIR}/exp-commands
+COMMAND_DIR=${BASE_DIR}/exp_scripts
 EPOCHS=20
 N_TRIALS=20
 CHECK_STEPS=100
@@ -24,8 +24,8 @@ CACHE_DIR=${BASE_DIR}/cache/${TRAIN}-${VAL}
 DATA_DIR=${BASE_DIR}/data
 
 TASK_CONFIG=${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json
-RUN_CONFIG_DIR=${BASE_DIR}/run_config_dir/${TRAIN}-${VAL}
-OUTPUT_DIR=${BASE_DIR}/outputs/${TRAIN}-${VAL}
+RUN_CONFIG_DIR=${BASE_DIR}/run_configs/${TRAIN}-${VAL}
+OUTPUT_DIR=${BASE_DIR}/output_dir/${TRAIN}-${VAL}
 
 MODEL_CONFIG=${MODELS_DIR}/${MODEL_TYPE}/config.json
 
