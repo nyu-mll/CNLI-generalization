@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from jiant.tasks.lib.templates.squad_style import core as squad_style_template
+import jiant.tasks.lib.templates.squad_style.core as squad_style_template
 
 
 @dataclass

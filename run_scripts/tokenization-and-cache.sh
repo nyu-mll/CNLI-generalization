@@ -13,13 +13,14 @@ DATA_DIR=${BASE_DIR}/data
 MODELS_DIR=${BASE_DIR}/models
 CACHE_DIR=${BASE_DIR}/cache
 
-python jiant/proj/main/tokenize_and_cache.py \
+python jiant/proj/simple/tokenize_and_cache.py \
     --task_config_path ${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json \
     --model_type ${MODEL_TYPE} \
     --model_tokenizer_path ${MODELS_DIR}/${MODEL_TYPE}/tokenizer \
     --phases train,val,test \
     --max_seq_length 256 \
     --do_iter \
+    --force_overwrite \
     --smart_truncate \
     --output_dir ${WORKING_DIR}/cache/${TRAIN}-${VAL}
 

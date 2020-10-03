@@ -37,7 +37,7 @@ def quick_init(args, verbose=True) -> QuickInitContainer:
     )
     args.seed = init_seed(given_seed=args.seed, n_gpu=n_gpu, verbose=verbose)
     init_output_dir(output_dir=args.output_dir, force_overwrite=args.force_overwrite)
-    log_writer = init_log_writer(output_dir=args.output_dir)
+    log_writer = init_log_writer(output_dir=args.output_dir, post=args.custom_logger_post)
     save_args(args=args, verbose=verbose)
     return QuickInitContainer(device=device, n_gpu=n_gpu, log_writer=log_writer)
 
@@ -152,8 +152,8 @@ def init_output_dir(output_dir, force_overwrite):
     os.makedirs(output_dir, exist_ok=True)
 
 
-def init_log_writer(output_dir):
-    return zlog.ZLogger(os.path.join(output_dir, str(int(time.time()))), overwrite=True)
+def init_log_writer(output_dir, post):
+    return zlog.ZLogger(os.path.join(output_dir, f"{str(int(time.time()))}{post}"), overwrite=True)
 
 
 def print_args(args):
@@ -161,7 +161,7 @@ def print_args(args):
         print("  {}: {}".format(k, v))
 
 
-def save_args(args, verbose=True):
+def save_args(args, verbose=True, matched=False):
     """Dumps RunConfiguration to a json file.
 
     Args:
@@ -170,8 +170,17 @@ def save_args(args, verbose=True):
 
     """
     formatted_args = json.dumps(vars(args), indent=2)
-    with open(os.path.join(args.output_dir, "args.json"), "w") as f:
-        f.write(formatted_args)
+    if args.args_jsonl:
+        if matched:
+            args_name = "args_matched.jsonl"
+        else:
+            args_name = "args.jsonl"
+
+        with open(os.path.join(args.output_dir, args_name), "a") as f:
+            f.write(f"{json.dumps(formatted_args)}\n")
+    else:
+        with open(os.path.join(args.output_dir, "args.json"), "w") as f:
+            f.write(formatted_args)
     if verbose:
         print(formatted_args)
 

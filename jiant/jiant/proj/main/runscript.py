@@ -11,7 +11,6 @@ import jiant.shared.initialization as initialization
 import jiant.shared.distributed as distributed
 import jiant.shared.model_setup as model_setup
 import jiant.utils.torch_utils as torch_utils
-import jiant.utils.python.io as py_io
 import jiant.utils.zconf as zconf
 
 
@@ -55,6 +54,14 @@ class RunConfiguration(zconf.RunConfig):
     local_rank = zconf.attr(default=-1, type=int)
     server_ip = zconf.attr(default="", type=str)
     server_port = zconf.attr(default="", type=str)
+
+    # New for result writing
+    val_jsonl = zconf.attr(action="store_true")
+    args_jsonl = zconf.attr(action="store_true")
+    custom_best_name = zconf.attr(default="", type=str)
+    custom_checkpoint_name = zconf.attr(default="", type=str)
+    custom_logger_post = zconf.attr(default="", type=str)
+    extract_exp_name_valpreds = zconf.attr(action="store_true")
 
 
 @zconf.run_config
@@ -147,9 +154,16 @@ def run_loop(args: RunConfiguration, checkpoint=None):
         if is_resumed:
             runner.load_state(checkpoint["runner_state"])
             del checkpoint["runner_state"]
+
+        # allow custom checkpoint name
+        if args.custom_checkpoint_name:
+            checkpoint_name = os.path.join(args.output_dir, f"{args.custom_checkpoint_name}.p")
+        else:
+            checkpoint_name = os.path.join(args.output_dir, "checkpoint.p")
+
         checkpoint_saver = jiant_runner.CheckpointSaver(
             metadata={"args": args.to_dict()},
-            save_path=os.path.join(args.output_dir, "checkpoint.p"),
+            save_path=os.path.join(args.output_dir, checkpoint_name),
         )
         if args.do_train:
             metarunner = jiant_metarunner.JiantMetarunner(
@@ -171,9 +185,15 @@ def run_loop(args: RunConfiguration, checkpoint=None):
             metarunner.run_train_loop()
 
         if args.do_save:
+            # allow custom best model name
+            if args.custom_best_name:
+                best_model_name = os.path.join(args.output_dir, f"{args.custom_best_name}.p")
+            else:
+                best_model_name = os.path.join(args.output_dir, "model.p")
+
             torch.save(
                 torch_utils.get_model_for_saving(runner.jiant_model).state_dict(),
-                os.path.join(args.output_dir, "model.p"),
+                best_model_name,
             )
 
         if args.do_val:
@@ -186,11 +206,22 @@ def run_loop(args: RunConfiguration, checkpoint=None):
                 metrics_aggregator=runner.jiant_task_container.metrics_aggregator,
                 output_dir=args.output_dir,
                 verbose=True,
+                val_jsonl=args.val_jsonl,
             )
+
+            if args.args_jsonl:
+                # match arguments with verbose results
+                initialization.save_args(args, verbose=True, matched=True)
+
             if args.write_val_preds:
+                if args.extract_exp_name_valpreds:
+                    exp_name = os.path.basename(args.jiant_task_container_config_path).split(".")[0]
+                    val_fname = f"val_preds_{exp_name}.p"
+                else:
+                    val_fname = "val_preds.p"
                 jiant_evaluate.write_preds(
                     eval_results_dict=val_results_dict,
-                    path=os.path.join(args.output_dir, "val_preds.p"),
+                    path=os.path.join(args.output_dir, val_fname),
                 )
         else:
             assert not args.write_val_preds
@@ -204,41 +235,14 @@ def run_loop(args: RunConfiguration, checkpoint=None):
                 path=os.path.join(args.output_dir, "test_preds.p"),
             )
 
-    if (
-        args.delete_checkpoint_if_done
-        and args.save_checkpoint_every_steps
-        and os.path.exists(os.path.join(args.output_dir, "checkpoint.p"))
-    ):
-        os.remove(os.path.join(args.output_dir, "checkpoint.p"))
-
-    py_io.write_file("DONE", os.path.join(args.output_dir, "done_file"))
+    if args.delete_checkpoint_if_done and args.save_checkpoint_every_steps:
+        os.remove(os.path.join(args.output_dir, checkpoint_name))
 
 
 def run_resume(args: ResumeConfiguration):
-    resume(checkpoint_path=args.checkpoint_path)
-
-
-def resume(checkpoint_path):
-    checkpoint = torch.load(checkpoint_path)
+    checkpoint = torch.load(args.checkpoint_path)
     args = RunConfiguration.from_dict(checkpoint["metadata"]["args"])
     run_loop(args=args, checkpoint=checkpoint)
-
-
-def run_with_continue(cl_args):
-    run_args = RunConfiguration.default_run_cli(cl_args=cl_args)
-    if os.path.exists(os.path.join(run_args.output_dir, "done_file")) or os.path.exists(
-        os.path.join(run_args.output_dir, "val_metrics.json")
-    ):
-        print("Already Done")
-        return
-    elif run_args.save_checkpoint_every_steps and os.path.exists(
-        os.path.join(run_args.output_dir, "checkpoint.p")
-    ):
-        print("Resuming")
-        resume(os.path.join(run_args.output_dir, "checkpoint.p"))
-    else:
-        print("Running from start")
-        run_loop(args=run_args)
 
 
 def main():
@@ -247,8 +251,6 @@ def main():
         run_loop(RunConfiguration.default_run_cli(cl_args=cl_args))
     elif mode == "continue":
         run_resume(ResumeConfiguration.default_run_cli(cl_args=cl_args))
-    elif mode == "run_with_continue":
-        run_with_continue(cl_args=cl_args)
     else:
         raise zconf.ModeLookupError(mode)
 
