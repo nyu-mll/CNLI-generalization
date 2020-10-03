@@ -78,7 +78,7 @@ def main(args: RunConfiguration):
 
         py_io.write_json(
             single_task_config(
-                task_config_path=task_container_config,
+                task_config_path=args.task_config_path,
                 task_cache_base_path=args.task_cache_base_path,
                 train_batch_size=sample_bs,
                 epochs=args.epochs,
