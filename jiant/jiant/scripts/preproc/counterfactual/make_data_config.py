@@ -24,7 +24,7 @@ def generate_data_config(
         val_file = "cnli"
 
     elif 'snli' in train:
-        config = {"task": "counterfactual_nli", "paths":{}, "name": "counterfactual_nli"}
+        config = {"task": "snli", "paths":{}, "name": "snli"}
         config["paths"]["train"] = os.path.join(data_base_path, train, "train.jsonl")
         config["paths"]["test"] = os.path.join(data_base_path, train, "test.jsonl")
 
