@@ -136,3 +136,4 @@ exp_scripts/*
 data/preprocessed/configs/*
 .idea/*
 .apex/*
+analysis/*
