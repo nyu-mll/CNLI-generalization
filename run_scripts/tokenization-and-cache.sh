@@ -24,4 +24,4 @@ python jiant/proj/simple/tokenize_and_cache.py \
     --smart_truncate \
     --output_dir ${CACHE_DIR}/${TRAIN}-${VAL}
 
-ls ${WORKING_DIR}/cache/${TRAIN}-${VAL}
+ls ${CACHE_DIR}/${TRAIN}-${VAL}
