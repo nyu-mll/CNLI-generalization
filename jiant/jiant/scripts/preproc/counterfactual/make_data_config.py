@@ -45,8 +45,10 @@ class RunConfiguration(zconf.RunConfig):
     data_base_path = zconf.attr(type=str)
     output_base_path = zconf.attr(type=str)
 
-    train = zconf.attr(default='cnli', type=str, choices={'cnli', 'cnli_seed', 'snlisub0', 'snlisub1', 'snlisub2', 'snlisub3', 'snlisub4'})
-    val = zconf.attr(default='mnli', type=str, choices={'glue_diagnostic', 'mnli', 'stress'})
+    train = zconf.attr(default='cnli', type=str,
+                       choices={'cnli', 'cnli_seed', 'snlisub0', 'snlisub1', 'snlisub2', 'snlisub3', 'snlisub4'},
+                       required=True)
+    val = zconf.attr(default='mnli', type=str, choices={'glue_diagnostic', 'mnli', 'stress'}, required=True)
 
 
 def main():

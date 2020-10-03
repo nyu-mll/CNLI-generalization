@@ -7,7 +7,6 @@ from datetime import datetime as dt
 
 import jiant.utils.python.io as py_io
 import jiant.utils.zconf as zconf
-import jiant.scripts.preproc.pairing_nli.make_config as make_config
 
 EVAL_STEPS = 5000
 NO_IMPROV_INT = 30
@@ -26,11 +25,13 @@ class RunConfiguration(zconf.RunConfig):
     exp_command_path = zconf.attr(type=str, required=True)
 
     # Others
-    task_name = zconf.attr(type=str, required=True)
     epochs = zconf.attr(type=int, required=True)
     n_trials = zconf.attr(type=int, required=True)
-    matchlist_pickle_path = zconf.attr(type=str, required=True)
-    sbatch_name = zconf.attr(type=str, required=True)
+    train = zconf.attr(default='cnli', type=str,
+                       choices={'cnli', 'cnli_seed', 'snlisub0', 'snlisub1', 'snlisub2', 'snlisub3', 'snlisub4'},
+                       required=True)
+    val = zconf.attr(default='mnli', type=str, choices={'glue_diagnostic', 'mnli', 'stress'}, required=True)
+
 
     # === Optional parameters === #
     batch_clustering = zconf.attr(action='store_true')
@@ -40,6 +41,7 @@ class RunConfiguration(zconf.RunConfig):
     no_improvements_for_n_evals = zconf.attr(type=int, default=0)
     eval_every_steps = zconf.attr(type=int, default=0)
     boolq = zconf.attr(action="store_true")
+    sbatch_name = zconf.attr(default="", type=str)
 
 def main(args: RunConfiguration):
     os.makedirs(args.run_config_path, exist_ok=True)
@@ -48,10 +50,28 @@ def main(args: RunConfiguration):
 
     now = dt.now().strftime("%Y%m%d%H%M")
     commands = []
-    cluster = "_cluster" if args.batch_clustering else ""
+
+    val2name = {
+        'stress':'stresseval',
+        'mnli':'mnlieval',
+        'glue_diagnostic':'diagnosticeval',
+    }
+
+    train2name = {
+        'cnli':'counterfactual_nli',
+        'cnli_seed':'counterfactual_nlisnlionly',
+    }
+
+    if train2name.get(args.train, False):
+        task_name = train2name[args.train]
+    else:
+        task_name = args.train
+
+    task_name += f'-{val2name[args.val]}'
+
     for idx in range(args.n_trials):
         sample_seed, sample_lr, sample_bs = sample_hyper_parameters(boolq=args.boolq)
-        exp_name = f"{args.task_name}{cluster}-bs_{sample_bs}-lr_{sample_lr}-seed_{sample_seed}-epochs_{args.epochs}"
+        exp_name = f"{task_name}-bs_{sample_bs}-lr_{sample_lr}-seed_{sample_seed}-epochs_{args.epochs}"
         task_container_config = os.path.join(args.run_config_path, f"{exp_name}.json")
 
         py_io.write_json(
@@ -61,7 +81,6 @@ def main(args: RunConfiguration):
                 train_batch_size=sample_bs,
                 epochs=args.epochs,
                 batch_clustering=args.batch_clustering,
-                matchlist_pickle_path=args.matchlist_pickle_path,
                 train_batch_tolerance=args.train_batch_tolerance,
             ),
             path=task_container_config,
@@ -72,7 +91,7 @@ def main(args: RunConfiguration):
                 task_container_config=task_container_config,
                 lr=sample_lr,
                 seed=sample_seed,
-                exp_name = exp_name,
+                exp_name=exp_name,
             )
         )
 
@@ -141,8 +160,10 @@ def single_task_command(
     if args.fp16:
         command.append(f"--fp16 ")
 
-    assert os.path.basename(args.sbatch_name).split('.')[1] == 'sbatch', f"arg.sbatch_name is not an sbatch file: {args.sbatch_name}"
-    return f'COMMAND="{"".join(command)}" sbatch {args.sbatch_name}\n'
+    if os.path.basename(args.sbatch_name).split('.')[1] == 'sbatch':
+        return f'COMMAND="{"".join(command)}" sbatch {args.sbatch_name}\n'
+    else:
+        return f'{"".join(command)}\n'
 
 def single_task_config(
         task_config_path,
