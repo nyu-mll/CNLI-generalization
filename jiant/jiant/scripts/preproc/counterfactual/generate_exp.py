@@ -74,7 +74,7 @@ def main(args: RunConfiguration):
     for idx in range(args.n_trials):
         sample_seed, sample_lr, sample_bs = sample_hyper_parameters(boolq=args.boolq)
         exp_name = f"{task_name}-bs_{sample_bs}-lr_{sample_lr}-seed_{sample_seed}-epochs_{args.epochs}"
-        task_container_config = os.path.join(args.run_config_path, f"{exp_name}.json")
+        task_container_config = os.path.join(args.run_config_path, f'{args.train}-{args.val}', f"{exp_name}.json")
 
         py_io.write_json(
             single_task_config(
@@ -96,7 +96,7 @@ def main(args: RunConfiguration):
             )
         )
 
-    with open(os.path.join(args.exp_command_path,f'submit_exp_{task_name}_{now}.sh'), "a") as f:
+    with open(os.path.join(args.exp_command_path,f'{args.train}-{args.val}',f'submit_exp_{task_name}_{now}.sh'), "a") as f:
         for command in commands:
             f.write(command)
 
@@ -145,7 +145,7 @@ def single_task_command(
         f"--no_improvements_for_n_evals {NO_IMPROV_INT} ",
         f"--save_checkpoint_every_steps {SAVE_STEPS} ",
         f"--seed {seed} ",
-        f"--output_dir {args.output_path} ",
+        f"--output_dir {os.path.join(args.output_path,f'{args.train}-{args.val}')} ",
         f"--val_jsonl --args_jsonl ",
         f"--custom_best_name {f'best_{exp_name}'} ",
         f"--custom_checkpoint_name {f'checkpoint_{exp_name}'} ",
