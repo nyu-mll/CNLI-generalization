@@ -35,7 +35,6 @@ class RunConfiguration(zconf.RunConfig):
 
     # === Optional parameters === #
     batch_clustering = zconf.attr(action='store_true')
-    train_batch_tolerance = zconf.attr(type=int, default=0)
     extract_exp_name_valpreds = zconf.attr(action="store_true")
     fp16 = zconf.attr(action="store_true")
     no_improvements_for_n_evals = zconf.attr(type=int, default=0)
@@ -84,7 +83,6 @@ def main(args: RunConfiguration):
                 train_batch_size=sample_bs,
                 epochs=args.epochs,
                 batch_clustering=args.batch_clustering,
-                train_batch_tolerance=args.train_batch_tolerance,
             ),
             path=task_container_config,
         )
