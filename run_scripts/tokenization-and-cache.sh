@@ -22,6 +22,6 @@ python jiant/proj/simple/tokenize_and_cache.py \
     --do_iter \
     --force_overwrite \
     --smart_truncate \
-    --output_dir ${WORKING_DIR}/cache/${TRAIN}-${VAL}
+    --output_dir ${CACHE_DIR}/${TRAIN}-${VAL}
 
 ls ${WORKING_DIR}/cache/${TRAIN}-${VAL}
