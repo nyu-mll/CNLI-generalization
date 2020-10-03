@@ -1,3 +1,5 @@
+#!/bin/bash
+
 TRAIN=$1
 VAL=$2
 
