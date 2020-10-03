@@ -13,7 +13,7 @@ DATA_DIR=${BASE_DIR}/data
 MODELS_DIR=${BASE_DIR}/models
 CACHE_DIR=${BASE_DIR}/cache
 
-python jiant/proj/simple/tokenize_and_cache.py \
+python jiant/proj/main/tokenize_and_cache.py \
     --task_config_path ${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json \
     --model_type ${MODEL_TYPE} \
     --model_tokenizer_path ${MODELS_DIR}/${MODEL_TYPE}/tokenizer \
