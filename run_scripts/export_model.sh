@@ -7,7 +7,7 @@ export PYTHONPATH=${BASE_DIR}/jiant:$PYTHONPATH
 
 cd jiant
 
-python jiant/proj/scripts/preproc/export_model.py \
+python jiant/scripts/preproc/export_model.py \
     --model_type ${MODEL_TYPE} \
     --output_base_path ${BASE_DIR}/models/${MODEL_TYPE}
 
