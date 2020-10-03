@@ -5,6 +5,7 @@ VAL=$2
 
 cd ..
 BASE_DIR=${PWD}
+echo ${BASE_DIR}
 source activate ./env
 export PYTHONPATH=${BASE_DIR}/jiant:$PYTHONPATH
 
