@@ -42,7 +42,6 @@ python jiant/scripts/preproc/counterfactual/generate_exp.py \
 	--epochs ${EPOCHS} \
 	--n_trials ${N_TRIALS} \
 	--sbatch_name ${SBATCH} \
-	--train_batch_tolerance ${TRAIN_BATCH_TOL} \
 	--fp16 \
 	--no_improvements_for_n_evals ${CHECK_STEPS} \
 	--eval_every_steps ${CHECK_STEPS} \
