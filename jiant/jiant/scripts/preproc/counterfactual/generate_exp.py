@@ -161,7 +161,9 @@ def single_task_command(
     if args.fp16:
         command.append(f"--fp16 ")
 
-    if os.path.basename(args.sbatch_name).split('.')[1] == 'sbatch':
+
+    sbatch_tester = os.path.basename(args.sbatch_name).split('.')
+    if len(sbatch_tester) > 1 and sbatch_tester[1] == 'sbatch':
         return f'COMMAND="{"".join(command)}" sbatch {args.sbatch_name}\n'
     else:
         return f'{"".join(command)}\n'
