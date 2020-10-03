@@ -44,9 +44,12 @@ class RunConfiguration(zconf.RunConfig):
     sbatch_name = zconf.attr(default="", type=str)
 
 def main(args: RunConfiguration):
-    os.makedirs(args.run_config_path, exist_ok=True)
     os.makedirs(args.exp_command_path, exist_ok=True)
+    os.makedirs(args.run_config_path, exist_ok=True)
     os.makedirs(args.output_path, exist_ok=True)
+
+    os.makedirs(os.path.join(args.run_config_path,f'{args.train}-{args.val}'), exist_ok=True)
+    os.makedirs(os.path.join(args.output_path,f'{args.train}-{args.val}'), exist_ok=True)
 
     now = dt.now().strftime("%Y%m%d%H%M")
     commands = []

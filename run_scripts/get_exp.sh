@@ -24,8 +24,8 @@ CACHE_DIR=${BASE_DIR}/cache/${TRAIN}-${VAL}
 DATA_DIR=${BASE_DIR}/data
 
 TASK_CONFIG=${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json
-RUN_CONFIG_DIR=${BASE_DIR}/run_configs/${TRAIN}-${VAL}
-OUTPUT_DIR=${BASE_DIR}/output_dir/${TRAIN}-${VAL}
+RUN_CONFIG_DIR=${BASE_DIR}/run_configs/
+OUTPUT_DIR=${BASE_DIR}/output_dir/
 
 MODEL_CONFIG=${MODELS_DIR}/${MODEL_TYPE}/config.json
 
