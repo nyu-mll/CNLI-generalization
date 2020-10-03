@@ -96,7 +96,7 @@ def main(args: RunConfiguration):
             )
         )
 
-    with open(os.path.join(args.exp_command_path,f'submit_exp_{args.task_name}{cluster}_{now}.sh'), "a") as f:
+    with open(os.path.join(args.exp_command_path,f'submit_exp_{task_name}_{now}.sh'), "a") as f:
         for command in commands:
             f.write(command)
 
