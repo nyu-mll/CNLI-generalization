@@ -135,5 +135,5 @@ output_dir/*
 exp_scripts/*
 data/preprocessed/configs/*
 .idea/*
-.apex/*
+apex/*
 analysis/*
