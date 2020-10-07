@@ -8,7 +8,7 @@ cd ..
 BASE_DIR=${PWD}
 export PYTHONPATH=${BASE_DIR}/jiant:$PYTHONPATH
 
-DATA_DIR=${BASE_DIR}/data
+DATA_DIR=${BASE_DIR}/data/preprocessed
 MODELS_DIR=${BASE_DIR}/models
 CACHE_DIR=${BASE_DIR}/cache
 
@@ -50,7 +50,7 @@ do
 
 
 		python jiant/proj/simple/tokenize_and_cache.py \
-		    --task_config_path ${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json \
+		    --task_config_path ${DATA_DIR}/configs/${TRAIN}-${VAL}.json \
 		    --model_type ${MODEL_TYPE} \
 		    --model_tokenizer_path ${MODELS_DIR}/${MODEL_TYPE}/tokenizer \
 		    --phases train,val,test \
@@ -81,9 +81,8 @@ do
 		EARLY_INT=3
 
 		CACHE_DIR=${BASE_DIR}/cache/${TRAIN}-${VAL}
-		DATA_DIR=${BASE_DIR}/data
 
-		TASK_CONFIG=${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json
+		TASK_CONFIG=${DATA_DIR}/configs/${TRAIN}-${VAL}.json
 		RUN_CONFIG_DIR=${BASE_DIR}/run_configs/
 		OUTPUT_DIR=${BASE_DIR}/output_dir/
 
