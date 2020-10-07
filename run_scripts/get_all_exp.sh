@@ -4,23 +4,23 @@ SBATCH=$2
 TRAINS=(snlisub0 snlisub1 snlisub2 snlisub3 snlisub4 cnli cnli_seed)
 VALS=(glue_diagnostic stress mnli)
 
-RUN_SCRIPTS=${PWD}
-
-# Export model
 cd ..
 BASE_DIR=${PWD}
 source activate ./env
 export PYTHONPATH=${BASE_DIR}/jiant:$PYTHONPATH
 
+DATA_DIR=${BASE_DIR}/data
+MODELS_DIR=${BASE_DIR}/models
+CACHE_DIR=${BASE_DIR}/cache
+
+# Export model
 cd jiant
 
 python jiant/scripts/preproc/export_model.py \
     --model_type ${MODEL_TYPE} \
-    --output_base_path ${BASE_DIR}/models/${MODEL_TYPE}
+    --output_base_path ${MODELS_DIR}/${MODEL_TYPE}
 
-echo Downloaded ${MODEL_TYPE} to ${BASE_DIR}/models/${MODEL_TYPE}
-
-cd $RUN_SCRIPTS
+echo Downloaded ${MODEL_TYPE} to ${MODELS_DIR}/${MODEL_TYPE}
 
 # Get data configurations for jiant
 for train in "${TRAINS[@]}"
@@ -30,7 +30,13 @@ do
 	for val in "${VALS[@]}"
 	do
 		echo $val
-		sh make_data_config.sh ${train} ${val}
+		python jiant/scripts/preproc/counterfactual/make_data_config.py \
+    		--data_base_path ${DATA_DIR}/data \
+    		--output_base_path ${DATA_DIR}/ \
+    		--train ${TRAIN} \
+    		--val ${VAL}
+
+		echo Created ${DATA_DIR}/configs/${TRAIN}-${VAL}.json
 	done
 done
 
@@ -42,7 +48,20 @@ do
 	for val in "${VALS[@]}"
 	do
 		echo $val
-		sh tokenization-and-cache.sh ${train} ${val} ${MODEL_TYPE}
+
+
+		python jiant/proj/simple/tokenize_and_cache.py \
+		    --task_config_path ${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json \
+		    --model_type ${MODEL_TYPE} \
+		    --model_tokenizer_path ${MODELS_DIR}/${MODEL_TYPE}/tokenizer \
+		    --phases train,val,test \
+		    --max_seq_length 256 \
+		    --do_iter \
+		    --force_overwrite \
+		    --smart_truncate \
+		    --output_dir ${CACHE_DIR}/${TRAIN}-${VAL}
+
+		ls ${CACHE_DIR}/${TRAIN}-${VAL}
 	done
 done
 
@@ -54,6 +73,39 @@ do
 	for val in "${VALS[@]}"
 	do
 		echo $val
-		sh get_exp.sh ${train} ${val} ${MODEL_TYPE} ${SBATCH}
+		# Used in arguments
+		JIANT_DIR=${BASE_DIR}/jiant
+		COMMAND_DIR=${BASE_DIR}/exp_scripts
+		EPOCHS=20
+		N_TRIALS=20
+		CHECK_STEPS=100
+		EARLY_INT=3
+
+		CACHE_DIR=${BASE_DIR}/cache/${train}-${val}
+		DATA_DIR=${BASE_DIR}/data
+
+		TASK_CONFIG=${DATA_DIR}/preprocessed/configs/${train}-${val}.json
+		RUN_CONFIG_DIR=${BASE_DIR}/run_configs/
+		OUTPUT_DIR=${BASE_DIR}/output_dir/
+
+		MODEL_CONFIG=${MODELS_DIR}/${MODEL_TYPE}/config.json
+
+		python jiant/scripts/preproc/counterfactual/generate_exp.py \
+		    --task_config_path ${TASK_CONFIG} \
+			--task_cache_base_path ${CACHE_DIR} \
+			--run_config_path ${RUN_CONFIG_DIR} \
+			--output_path ${OUTPUT_DIR} \
+			--jiant_path ${JIANT_DIR} \
+			--model_config ${MODEL_CONFIG} \
+			--exp_command_path ${COMMAND_DIR} \
+			--train ${train} \
+			--val ${val} \
+			--epochs ${EPOCHS} \
+			--n_trials ${N_TRIALS} \
+			--sbatch_name ${SBATCH} \
+			--fp16 \
+			--no_improvements_for_n_evals ${CHECK_STEPS} \
+			--eval_every_steps ${CHECK_STEPS} \
+			--extract_exp_name_valpreds
 	done
 done
