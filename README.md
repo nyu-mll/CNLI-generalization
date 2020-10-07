@@ -1,27 +1,41 @@
-# jiant
-[![Generic badge](https://img.shields.io/badge/version-2.0.dev0-blue.svg)](https://shields.io/)
-[![codecov](https://codecov.io/gh/jiant-dev/jiant/branch/master/graph/badge.svg)](https://codecov.io/gh/jiant-dev/jiant)
+# Generalization of Counterfactually-Augmented NLI Data
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-`jiant` is a software toolkit for natural language processing research, designed to facilitate work on multitask learning and transfer learning for sentence understanding tasks. 
+### Set-up
 
-### Installation
+To set-up  an environment first install requirements with the following:
+
 ```
-git clone https://github.com/jiant-dev/jiant.git
+git clone https://github.com/wh629/CNLI-generalization.git
 pip install -r jiant/requirements-dev.txt
 ```
 
-### Getting started
-Examples to help you get started can be found here [INSERT LINK].
+Then install apex from:
 
-### Documentation
-Documentation for `jiant` v2.0.dev0 can be found [here](https://jiant-dev.github.io/jiant/).
+`https://github.com/NVIDIA/apex`
 
-### Issues
-Templates for bug reports and feature requests are provided [here](https://github.com/jiant-dev/jiant/issues/new/choose).
+### Description
 
-### Contributing
-The `jiant` project's contributing guidelines can be found [here](CONTRIBUTING.md).
+#### General
+
+You can use `get_all_exp.sh` in `run_scripts` to get Python commands for experiments using:
+
+```
+sh get_all_exp.sh roberta-base none
+```
+
+Commands can be found in the newly created `exp_scripts` directory as `submit_exp_<training data>-<validation data>_<time stamp>.sh`.
+
+#### NYU Prince
+
+Experiments are run on NYU's Prince HPC with Slurm. The following command can be used to generate commands to submit multiple jobs:
+
+```
+sh get_all_exp.sh roberta-base <absolute path to .sbatch file>
+```
+
+An example `.sbatch` is provided in `run_scripts` that requires updates to the `<env name>` and `<jiant path>`.
 
 ### License
-`jiant` is released under the [MIT License](https://github.com/jiant-dev/jiant/blob/master/LICENSE).
+Our code is released under the [MIT License](https://github.com/jiant-dev/jiant/blob/master/LICENSE).
