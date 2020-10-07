@@ -23,13 +23,13 @@ python jiant/scripts/preproc/export_model.py \
 echo Downloaded ${MODEL_TYPE} to ${MODELS_DIR}/${MODEL_TYPE}
 
 # Get data configurations for jiant
-for train in "${TRAINS[@]}"
+for TRAIN in "${TRAINS[@]}"
 do
-	echo $train
+	echo $TRAIN
 
-	for val in "${VALS[@]}"
+	for VAL in "${VALS[@]}"
 	do
-		echo $val
+		echo $VAL
 		python jiant/scripts/preproc/counterfactual/make_data_config.py \
     		--data_base_path ${DATA_DIR}/data \
     		--output_base_path ${DATA_DIR}/ \
@@ -41,13 +41,13 @@ do
 done
 
 # Tokenize and cache data for jiant
-for train in "${TRAINS[@]}"
+for TRAIN in "${TRAINS[@]}"
 do
-	echo $train
+	echo $TRAIN
 
-	for val in "${VALS[@]}"
+	for VAL in "${VALS[@]}"
 	do
-		echo $val
+		echo $VAL
 
 
 		python jiant/proj/simple/tokenize_and_cache.py \
@@ -66,13 +66,13 @@ do
 done
 
 # Get commands for experiments
-for train in "${TRAINS[@]}"
+for TRAIN in "${TRAINS[@]}"
 do
-	echo $train
+	echo $TRAIN
 
-	for val in "${VALS[@]}"
+	for VAL in "${VALS[@]}"
 	do
-		echo $val
+		echo $VAL
 		# Used in arguments
 		JIANT_DIR=${BASE_DIR}/jiant
 		COMMAND_DIR=${BASE_DIR}/exp_scripts
@@ -81,10 +81,10 @@ do
 		CHECK_STEPS=100
 		EARLY_INT=3
 
-		CACHE_DIR=${BASE_DIR}/cache/${train}-${val}
+		CACHE_DIR=${BASE_DIR}/cache/${TRAIN}-${VAL}
 		DATA_DIR=${BASE_DIR}/data
 
-		TASK_CONFIG=${DATA_DIR}/preprocessed/configs/${train}-${val}.json
+		TASK_CONFIG=${DATA_DIR}/preprocessed/configs/${TRAIN}-${VAL}.json
 		RUN_CONFIG_DIR=${BASE_DIR}/run_configs/
 		OUTPUT_DIR=${BASE_DIR}/output_dir/
 
@@ -98,8 +98,8 @@ do
 			--jiant_path ${JIANT_DIR} \
 			--model_config ${MODEL_CONFIG} \
 			--exp_command_path ${COMMAND_DIR} \
-			--train ${train} \
-			--val ${val} \
+			--train ${TRAIN} \
+			--val ${VAL} \
 			--epochs ${EPOCHS} \
 			--n_trials ${N_TRIALS} \
 			--sbatch_name ${SBATCH} \
