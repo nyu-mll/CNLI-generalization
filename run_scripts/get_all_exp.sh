@@ -6,7 +6,6 @@ VALS=(glue_diagnostic stress mnli)
 
 cd ..
 BASE_DIR=${PWD}
-source activate ./env
 export PYTHONPATH=${BASE_DIR}/jiant:$PYTHONPATH
 
 DATA_DIR=${BASE_DIR}/data
