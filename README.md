@@ -45,11 +45,11 @@ All scripts used to produce figures and tables can be found in the `analysis_scr
 
 ```
 @inproceedings{huang2020cnligeneralization,
-		title={Counterfactually-Augmented {SNLI} Training Data Does Not Yield Better Generalization Than Unaugmented Data},
-		author={William Huang and Haokun Liu and Samuel R. Bowman},
-		booktitle = {Proceedings of the 2020 EMNLP Workshop on Insights from Negative Results in NLP},
-		year={2020},
-		publisher = {The Association for Computational Linguistics}
+	title={Counterfactually-Augmented {SNLI} Training Data Does Not Yield Better Generalization Than Unaugmented Data},
+	author={William Huang and Haokun Liu and Samuel R. Bowman},
+	booktitle = {Proceedings of the 2020 EMNLP Workshop on Insights from Negative Results in NLP},
+	year={2020},
+	publisher = {The Association for Computational Linguistics}
 }
 ```
 
