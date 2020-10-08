@@ -27,9 +27,9 @@ For general use, you can get Python commands for experiments using:
 sh get_all_exp.sh roberta-base none
 ```
 
-#### NYU Prince
+#### New York University's Prince Computing Cluster
 
-Experiments are run on NYU's Prince HPC with Slurm. The following command can be used to generate commands to submit multiple jobs:
+Experiments are run on NYU's Prince computing cluster managed with Slurm. The following command can be used to generate commands to submit multiple jobs:
 
 ```
 sh get_all_exp.sh roberta-base <absolute path to .sbatch file>
@@ -37,9 +37,21 @@ sh get_all_exp.sh roberta-base <absolute path to .sbatch file>
 
 An example `.sbatch` is provided in `run_scripts` that requires updates to the `<env name>` and `<jiant path>`.
 
+#### Analysis
+
+All scripts used to produce figures and tables can be found in the `analysis_scripts` directory. Please refer to `analysis.ipynb` for code used to compare run results and `lexical-diversity.ipynb` for code used for $n$-gram counts.
+
 ### Recommended Citation
 
-To be updated.
+```
+@inproceedings{huang2020cnligeneralization,
+		title={Counterfactually-Augmented {SNLI} Training Data Does Not Yield Better Generalization Than Unaugmented Data},
+		author={William Huang and Haokun Liu and Samuel R. Bowman},
+		booktitle = {Proceedings of the 2020 EMNLP Workshop on Insights from Negative Results in NLP},
+		year={2020},
+		publisher = {The Association for Computational Linguistics}
+}
+```
 
 ### License
 Our code is released under the [MIT License](https://github.com/jiant-dev/jiant/blob/master/LICENSE).
