@@ -37,5 +37,9 @@ sh get_all_exp.sh roberta-base <absolute path to .sbatch file>
 
 An example `.sbatch` is provided in `run_scripts` that requires updates to the `<env name>` and `<jiant path>`.
 
+### Recommended Citation
+
+To be updated.
+
 ### License
 Our code is released under the [MIT License](https://github.com/jiant-dev/jiant/blob/master/LICENSE).
